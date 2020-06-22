@@ -1,8 +1,8 @@
 import React, {Fragment, useState} from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import {FormControlLabel,Checkbox, RadioGroup, Radio, Button} from '@material-ui/core';
-
-
+import {MuiPickersUtilsProvider,KeyboardDatePicker} from "@material-ui/pickers";
+import DateFnsUtils from '@date-io/date-fns';
 
 const useStyles = makeStyles({
     root: {
@@ -22,6 +22,9 @@ const useStyles = makeStyles({
         maxWidth: 150,
         paddingLeft: 350,
         paddingTop: 12
+    },
+    date:{
+        width:400
     }
 
 });
@@ -41,11 +44,61 @@ const FormComponent = ({ data }) => {
     const handleChange = (event) => {
         setState({ ...state, [event.target.name]: event.target.checked });
     };
+    const [selectedDate, setSelectedDate] = React.useState(new Date('2020-06-22T21:11:54'));
+
+    const handleDateChange = (date) => {
+        setSelectedDate(date);
+    };
 
     const classes = useStyles();
     return (
         <div className={classes.div}>
             <table border="1">
+
+                <tr>
+
+                    <td>
+
+                    </td>
+                    <td colSpan={2}>
+                        <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                            <KeyboardDatePicker
+                                disableToolbar
+                                variant="inline"
+                                format="MM/dd/yyyy"
+                                margin="normal"
+                                id="date-picker-inline"
+                                label="Date picker inline"
+                                onChange={handleDateChange}
+                                value={selectedDate}
+                                KeyboardButtonProps={{
+                                    'aria-label': 'change date',
+                                }}
+                                className={classes.date}
+                            />
+                        </MuiPickersUtilsProvider>
+                    </td>
+                    <td colSpan={2}>
+                        <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                            <KeyboardDatePicker
+                                disableToolbar
+                                variant="inline"
+                                format="MM/dd/yyyy"
+                                margin="normal"
+                                id="date-picker-inline"
+                                label="Date picker inline"
+                                value={selectedDate}
+                                onChange={handleDateChange}
+                                KeyboardButtonProps={{
+                                    'aria-label': 'change date',
+                                }}
+                                className={classes.date}
+                            />
+                        </MuiPickersUtilsProvider>
+                    </td>
+                </tr>
+
+
                 <tr>
                     <td className={classes.td}><label className={classes.root}>Current Year/Month</label></td><td>
                             <FormControlLabel
