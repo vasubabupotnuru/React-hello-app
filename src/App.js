@@ -15,15 +15,12 @@ class AppComponent extends Component{
   render() {
 
      return(<Fragment>
-        <Container maxWidth="sm">
-          <Button variant="contained" color="primary" disableElevation>
-            Disable elevation
-          </Button>
-          <div>
-            <h2>Hello This is test</h2>
-          </div>
+
+          {/*<Button variant="contained" color="primary" disableElevation>*/}
+          {/*  Disable elevation*/}
+          {/*</Button>*/}
         <FormComponent></FormComponent>
-        </Container>
+
          </Fragment>
     );
   }
