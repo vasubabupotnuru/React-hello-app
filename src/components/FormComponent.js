@@ -46,8 +46,11 @@ const FormComponent = ({ data }) => {
         monthDisable: false,
         yearDisable: false,
         today: new Date()
-
     });
+
+    const [validateState, setValidateState] = React.useState({
+        submit:false
+    })
 
     const handleChange = (event) => {
         setState({ ...state, [event.target.name]: event.target.checked });
@@ -57,16 +60,29 @@ const FormComponent = ({ data }) => {
         if(event.target.checked) {
             if(event.target.name == 'checkedA') {
                 setState({...state, [event.target.name]: event.target.checked, monthDisable:true, validateDate: true});
+                setValidateState({submit: false});
             }
             else if(event.target.name == 'checkedB'){
                 setState({...state, [event.target.name]: event.target.checked,yearDisable:true, validateDate: true});
+                setValidateState({submit: false});
             }
         }else{
             if(event.target.name == 'checkedA') {
                 setState({...state, [event.target.name]: event.target.checked, monthDisable:false, validateDate: false});
+                if(fromSelectedDate && toSelectedDate) {
+                    setValidateState({submit: false});
+                }else{
+                    setValidateState({submit: true});
+                }
             }
             else if(event.target.name == 'checkedB'){
                 setState({...state, [event.target.name]: event.target.checked,yearDisable:false, validateDate: false});
+                if(fromSelectedDate && toSelectedDate) {
+                    setValidateState({submit: false});
+                }else{
+                    setValidateState({submit: true});
+                }
+
             }
         }
 
@@ -82,21 +98,44 @@ const FormComponent = ({ data }) => {
 
     };
 
+    const formatTypeChange = (event) => {
+        setformatTypeValue(event.target.value);
+      console.log(event.target.value);
+    };
+    const [formatTypeValue, setformatTypeValue] = React.useState('DetailedReport');
 
     const [fromSelectedDate, setFromSelectedDate] = React.useState(new Date());
 
     const [toSelectedDate, setToSelectedDate] = React.useState(new Date());
 
     const handleFromDateChange = (date) => {
-        setFromSelectedDate(date);
+        if(date) {
+            setFromSelectedDate(date);
+            if(toSelectedDate) {
+                setValidateState({submit: false});
+            }
+        }else{
+            setValidateState({submit: true});
+            setFromSelectedDate(date);
+        }
     };
     const handleToDateChange = (date) => {
-        setToSelectedDate(date);
+        if(date) {
+            setToSelectedDate(date);
+            if(fromSelectedDate) {
+                setValidateState({submit: false});
+            }
+        }else{
+            setValidateState({submit: true});
+            setToSelectedDate(date);
+        }
     };
+
+
 
     function handleSubmit(event) {
         event.preventDefault();
-        console.log( 'data'+JSON.stringify(state));
+        console.log( 'data'+JSON.stringify(state)+"---"+fromSelectedDate+"--"+toSelectedDate+"--"+formatTypeValue);
 
         // ..code to submit form to backend here...
 
@@ -154,37 +193,6 @@ const FormComponent = ({ data }) => {
                     </td>
                 </tr>
                 <tr>
-                    <td className={classes.td}>
-                        <label className={classes.root}>Status</label></td><td>
-                        <FormControlLabel
-                                control={
-                                    <Checkbox
-                                        checked={state.checkedC}
-                                        onChange={activateHandleChange}
-                                        name="checkedC"
-                                        color="primary"
-                                        value="Activated"
-                                    />
-                                }
-                                label="Activated"
-                            />
-                </td>
-                    <td colSpan={3}>
-                            <FormControlLabel
-                                control={
-                                    <Checkbox
-                                        checked={state.checkedD}
-                                        onChange={activateHandleChange}
-                                        name="checkedD"
-                                        color="primary"
-                                        value="NotActivated"
-                                    />
-                                }
-                                label="NotActivated"
-                            />
-                    </td>
-                </tr>
-                <tr>
                     <td className={classes.td}><label className={classes.root}>Current Year/Month</label></td><td>
                             <FormControlLabel
                                 control={
@@ -217,6 +225,37 @@ const FormComponent = ({ data }) => {
 
                     </td>
 
+                </tr>
+                <tr>
+                    <td className={classes.td}>
+                        <label className={classes.root}>Status</label></td><td>
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                checked={state.checkedC}
+                                onChange={activateHandleChange}
+                                name="checkedC"
+                                color="primary"
+                                value="Activated"
+                            />
+                        }
+                        label="Activated"
+                    />
+                </td>
+                    <td colSpan={3}>
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    checked={state.checkedD}
+                                    onChange={activateHandleChange}
+                                    name="checkedD"
+                                    color="primary"
+                                    value="NotActivated"
+                                />
+                            }
+                            label="NotActivated"
+                        />
+                    </td>
                 </tr>
                   <tr>
                       <td className={classes.td}>
@@ -283,7 +322,7 @@ const FormComponent = ({ data }) => {
                       <td className={classes.td}>
                           <label className={classes.root}>Format Type</label></td>
                       <td colSpan={4}>
-                          <RadioGroup row >
+                          <RadioGroup row onChange={formatTypeChange} value={formatTypeValue}>
                               <FormControlLabel
                                   value="SummerizedReport"
                                                 control=
@@ -312,7 +351,7 @@ const FormComponent = ({ data }) => {
                       </td>
                   </tr>
                 <tr><td colSpan={2} className={classes.border}></td>
-                    <td className={classes.border}><div className={classes.button}><Button variant="contained" color="primary" disabled={state.disabled} type="submit">
+                    <td className={classes.border}><div className={classes.button}><Button variant="contained" color="primary" disabled={validateState.submit || state.disabled} type="submit">
                         Download
                     </Button></div></td><td colSpan={2} className={classes.border}></td>
                 </tr>
