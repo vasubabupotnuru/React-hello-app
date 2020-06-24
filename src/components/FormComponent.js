@@ -44,7 +44,8 @@ const FormComponent = ({ data }) => {
         disabled: false,
         validateDate: false,
         monthDisable: false,
-        yearDisable: false
+        yearDisable: false,
+        today: new Date()
 
     });
 
@@ -82,10 +83,15 @@ const FormComponent = ({ data }) => {
     };
 
 
-    const [selectedDate, setSelectedDate] = React.useState(new Date('2020-06-22T21:11:54'));
+    const [fromSelectedDate, setFromSelectedDate] = React.useState(new Date());
 
-    const handleDateChange = (date) => {
-        setSelectedDate(date);
+    const [toSelectedDate, setToSelectedDate] = React.useState(new Date());
+
+    const handleFromDateChange = (date) => {
+        setFromSelectedDate(date);
+    };
+    const handleToDateChange = (date) => {
+        setToSelectedDate(date);
     };
 
     function handleSubmit(event) {
@@ -116,12 +122,13 @@ const FormComponent = ({ data }) => {
                                 margin="normal"
                                 id="date-picker-inline"
                                 label="Date picker inline"
-                                onChange={handleDateChange}
-                                value={selectedDate}
+                                onChange={handleFromDateChange}
+                                value={fromSelectedDate}
                                 KeyboardButtonProps={{
                                     'aria-label': 'change date',
                                 }}
                                 className={classes.date}
+                                minDate={state.today}
                             />
                         </MuiPickersUtilsProvider>
                     </td>
@@ -135,12 +142,13 @@ const FormComponent = ({ data }) => {
                                 margin="normal"
                                 id="date-picker-inline"
                                 label="Date picker inline"
-                                value={selectedDate}
-                                onChange={handleDateChange}
+                                value={toSelectedDate}
+                                onChange={handleToDateChange}
                                 KeyboardButtonProps={{
                                     'aria-label': 'change date',
                                 }}
                                 className={classes.date}
+                                minDate={fromSelectedDate}
                             />
                         </MuiPickersUtilsProvider>
                     </td>
