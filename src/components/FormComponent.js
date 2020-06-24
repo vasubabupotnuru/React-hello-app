@@ -19,32 +19,56 @@ const useStyles = makeStyles({
         fontWeight: "bold"
     },
     button:{
-        maxWidth: 150,
-        paddingLeft: 350,
-        paddingTop: 12
+        textAlign: "center"
+
     },
     date:{
         width:400
+    },
+    border:{
+        border: "none"
     }
 
 });
 
 const FormComponent = ({ data }) => {
     const [state, setState] = React.useState({
-        checkedA: true,
-        checkedB: true,
+        checkedA: false,
+        checkedB: false,
         checkedC: true,
         checkedD: true,
         checkedE: true,
         checkedF: true,
         checkedG: true,
         checkedH: true,
-        disabled: false
+        disabled: false,
+        validateDate: false,
+        monthDisable: false,
+        yearDisable: false
 
     });
 
     const handleChange = (event) => {
         setState({ ...state, [event.target.name]: event.target.checked });
+    };
+
+    const handleCurrentChange = (event) => {
+        if(event.target.checked) {
+            if(event.target.name == 'checkedA') {
+                setState({...state, [event.target.name]: event.target.checked, monthDisable:true, validateDate: true});
+            }
+            else if(event.target.name == 'checkedB'){
+                setState({...state, [event.target.name]: event.target.checked,yearDisable:true, validateDate: true});
+            }
+        }else{
+            if(event.target.name == 'checkedA') {
+                setState({...state, [event.target.name]: event.target.checked, monthDisable:false, validateDate: false});
+            }
+            else if(event.target.name == 'checkedB'){
+                setState({...state, [event.target.name]: event.target.checked,yearDisable:false, validateDate: false});
+            }
+        }
+
     };
 
     const activateHandleChange = (event) => {
@@ -64,11 +88,19 @@ const FormComponent = ({ data }) => {
         setSelectedDate(date);
     };
 
+    function handleSubmit(event) {
+        event.preventDefault();
+        console.log( 'data'+JSON.stringify(state));
+
+        // ..code to submit form to backend here...
+
+    }
 
 
     const classes = useStyles();
 
     return (
+        <form id="userReportForm" onSubmit={handleSubmit}>
         <div className={classes.div}>
             <table border="1">
                 <tr>
@@ -78,6 +110,7 @@ const FormComponent = ({ data }) => {
                         <MuiPickersUtilsProvider utils={DateFnsUtils}>
                             <KeyboardDatePicker
                                 disableToolbar
+                                disabled={state.validateDate}
                                 variant="inline"
                                 format="MM/dd/yyyy"
                                 margin="normal"
@@ -96,6 +129,7 @@ const FormComponent = ({ data }) => {
                         <MuiPickersUtilsProvider utils={DateFnsUtils}>
                             <KeyboardDatePicker
                                 disableToolbar
+                                disabled={state.validateDate}
                                 variant="inline"
                                 format="MM/dd/yyyy"
                                 margin="normal"
@@ -148,11 +182,11 @@ const FormComponent = ({ data }) => {
                                 control={
                                     <Checkbox
                                         checked={state.checkedA}
-                                        onChange={handleChange}
+                                        onChange={handleCurrentChange}
                                         name="checkedA"
                                         color="primary"
                                         value="CurrentYear"
-                                        disabled={state.disabled}
+                                        disabled={state.yearDisable}
                                     />
                                 }
                                 label="CurrentYear"
@@ -163,11 +197,11 @@ const FormComponent = ({ data }) => {
                                 control={
                                     <Checkbox
                                         checked={state.checkedB}
-                                        onChange={handleChange}
+                                        onChange={handleCurrentChange}
                                         name="checkedB"
                                         color="primary"
                                         value="CurrentMonth"
-                                        disabled={state.disabled}
+                                        disabled={state.monthDisable}
                                     />
                                 }
                                 label="CurrentMonth"
@@ -269,14 +303,14 @@ const FormComponent = ({ data }) => {
                           </RadioGroup>
                       </td>
                   </tr>
-
+                <tr><td colSpan={2} className={classes.border}></td>
+                    <td className={classes.border}><div className={classes.button}><Button variant="contained" color="primary" disabled={state.disabled} type="submit">
+                        Download
+                    </Button></div></td><td colSpan={2} className={classes.border}></td>
+                </tr>
             </table>
-            <div className={classes.button}>
-            <Button variant="contained" color="primary" disabled={state.disabled}>
-                Download
-            </Button>
-            </div>
         </div>
+        </form>
     );
 };
 
