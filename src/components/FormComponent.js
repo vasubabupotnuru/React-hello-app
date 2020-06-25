@@ -31,6 +31,14 @@ const useStyles = makeStyles({
 
 });
 
+const reqModel = {
+    startDate : '',
+    endDate : '',
+    statusTypes: [],
+    userTypes: [],
+    reportFormatType: ''
+};
+
 const FormComponent = ({ data }) => {
     const [state, setState] = React.useState({
         checkedA: false,
@@ -46,6 +54,7 @@ const FormComponent = ({ data }) => {
         monthDisable: false,
         yearDisable: false,
         today: new Date()
+
     });
 
     const [validateState, setValidateState] = React.useState({
@@ -89,6 +98,7 @@ const FormComponent = ({ data }) => {
     };
 
     const activateHandleChange = (event) => {
+        console.log("changed");
         if(event.target.checked){
             setState({...state, [event.target.name]: event.target.checked,disabled: false});
         }else{
@@ -135,9 +145,51 @@ const FormComponent = ({ data }) => {
 
     function handleSubmit(event) {
         event.preventDefault();
-        console.log( 'data'+JSON.stringify(state)+"---"+fromSelectedDate+"--"+toSelectedDate+"--"+formatTypeValue);
+        if(state.checkedA || state.checkedB){
+            const date = new Date();
+            if(state.checkedA){
+                // current year
+                const d = new Date(new Date().getFullYear(), 0, 1);
+                const startDate = d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();
+                const endDate = new Date().toISOString().slice(0,10);
+                reqModel.startDate = startDate;
+                reqModel.endDate = endDate;
+            }else{
+                // current month
+                const d = new Date(date.getFullYear(), date.getMonth(), 1);
+                const startDate = d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();
+                const endDate = new Date().toISOString().slice(0,10);
+                reqModel.startDate = startDate;
+                reqModel.endDate = endDate;
+            }
+        }else{
+            // range validation
+            const startDate = new Date(fromSelectedDate).toISOString().slice(0,10);
+            const endDate = new Date(toSelectedDate).toISOString().slice(0,10);
+            reqModel.startDate = startDate;
+            reqModel.endDate = endDate;
+        }
+        // report type format
+        reqModel.reportFormatType = formatTypeValue;
+        reqModel.statusTypes = [];
+        reqModel.userTypes = [];
+        if(state.checkedC)
+            reqModel.statusTypes.push('ActiVated');
+        if(state.checkedC)
+            reqModel.statusTypes.push('NotActivated');
+        if(state.checkedE)
+            reqModel.userTypes.push('Registered&Verified');
+        if(state.checkedF)
+            reqModel.userTypes.push('Registered&NotVerified');
+        if(state.checkedG)
+            reqModel.userTypes.push('Migrated&Verified');
+        if(state.checkedH)
+            reqModel.userTypes.push('Migrated&NotVerified');
 
-        // ..code to submit form to backend here...
+
+        console.log( 'data'+JSON.stringify(reqModel));
+
+        // ..code to submit form to backend here... finally call service with reqModel
 
     }
 
@@ -267,7 +319,7 @@ const FormComponent = ({ data }) => {
                                   onChange={handleChange}
                                   name="checkedE"
                                   color="primary"
-                                  value="Activated"
+                                  value="Registered&Verified"
                                   disabled={state.disabled}
                               />
                           }
@@ -282,7 +334,7 @@ const FormComponent = ({ data }) => {
                                       onChange={handleChange}
                                       name="checkedF"
                                       color="primary"
-                                      value="NotActivated"
+                                      value="Registered&NotVerified"
                                       disabled={state.disabled}
                                   />
                               }
@@ -296,7 +348,7 @@ const FormComponent = ({ data }) => {
                                   onChange={handleChange}
                                   name="checkedG"
                                   color="primary"
-                                  value="NotActivated"
+                                  value="Migrated&Verified"
                                   disabled={state.disabled}
                               />
                           }
@@ -310,7 +362,7 @@ const FormComponent = ({ data }) => {
                                   onChange={handleChange}
                                   name="checkedH"
                                   color="primary"
-                                  value="NotActivated"
+                                  value="Migrated&NotVerified"
                                   disabled={state.disabled}
                               />
                           }
