@@ -8,19 +8,30 @@ const useStyles = makeStyles({
     root: {
         paddingTop: 10,
         paddingRight: 10
-    }, // a style rule
-    label: {}, // a nested style rule
+    },
+    label: {},
     div:{
-        maxWidth: 800,
+        maxWidth: 1000,
         margin: "auto"
     },
-    td: {
+    tdFirstCol: {
         backgroundColor: "darkgray",
-        fontWeight: "bold"
+        fontWeight: "bold",
+        textAlign: "center"
+    },
+    tdCols: {
+        fontWeight: "bold",
+        paddingLeft: "10px"
+    },
+    tdButton:{
+        fontWeight: "bold",
+        paddingLeft: "450px"
+
     },
     button:{
+        maxWidth: 150,
+        paddingTop: 5,
         textAlign: "center"
-
     },
     date:{
         width:400
@@ -31,7 +42,7 @@ const useStyles = makeStyles({
 
 });
 
-const reqModel = {
+const reportData = {
     startDate : '',
     endDate : '',
     statusTypes: [],
@@ -41,52 +52,76 @@ const reqModel = {
 
 const FormComponent = ({ data }) => {
     const [state, setState] = React.useState({
-        checkedA: false,
-        checkedB: false,
-        checkedC: true,
-        checkedD: true,
-        checkedE: true,
-        checkedF: true,
-        checkedG: true,
-        checkedH: true,
-        disabled: false,
-        validateDate: false,
-        monthDisable: false,
-        yearDisable: false,
+        CurrentYear: false, //CurrentYear
+        CurrentMonth: false, //CurrentYear
+        Activated: true,  //Activated
+        NotActivated: true, //NotActivated
+        RegisteredVerified: true, //RegisteredVerified
+        RegisteredNotVerified: true, //RegisteredNotVerified
+        MigratedVerified: true, //MigratedVerified
+        MigratedNotVerified: true, //MigratedNotVerified
+        disabled: false,    //disabled
+        dateDisabled: false, //dateDisabled
+        monthDisabled: false,  //monthDisabled
+        yearDisabled: false, //yearDisabled
         today: new Date()
 
     });
+
+    const [selectedFromDate, setSelectedFromDate] = React.useState(new Date('11/22/2019'));
+    const [selectedToDate, setSelectedToDate] = React.useState(new Date());
+    const [formatTypeValue, setformatTypeValue] = React.useState('DetailedReport');
 
     const [validateState, setValidateState] = React.useState({
         submit:false
     })
 
-    const handleChange = (event) => {
-        setState({ ...state, [event.target.name]: event.target.checked });
-    };
-
-    const handleCurrentChange = (event) => {
-        if(event.target.checked) {
-            if(event.target.name == 'checkedA') {
-                setState({...state, [event.target.name]: event.target.checked, monthDisable:true, validateDate: true});
-                setValidateState({submit: false});
-            }
-            else if(event.target.name == 'checkedB'){
-                setState({...state, [event.target.name]: event.target.checked,yearDisable:true, validateDate: true});
+    const handleFromDateChange = (date) => {
+        if(date) {
+            setSelectedFromDate(date);
+            if(selectedToDate) {
                 setValidateState({submit: false});
             }
         }else{
-            if(event.target.name == 'checkedA') {
-                setState({...state, [event.target.name]: event.target.checked, monthDisable:false, validateDate: false});
-                if(fromSelectedDate && toSelectedDate) {
+            setValidateState({submit: true});
+            setSelectedFromDate(date);
+        }
+    };
+    const handleToDateChange = (date) => {
+        if(date) {
+            setSelectedToDate(date);
+            if(selectedFromDate) {
+                setValidateState({submit: false});
+            }
+        }else{
+            setValidateState({submit: true});
+            setSelectedToDate(date);
+        }
+    };
+
+
+    const handleCurrentYearMonthChange = (event) => {
+        if(event.target.checked) {
+            if(event.target.name === 'CurrentYear') {
+                setState({...state, [event.target.name]: event.target.checked, monthDisabled:true, dateDisabled: true});
+                setValidateState({submit: false});
+            }
+            else if(event.target.name === 'CurrentMonth'){
+                setState({...state, [event.target.name]: event.target.checked,yearDisabled:true, dateDisabled: true});
+                setValidateState({submit: false});
+            }
+        }else{
+            if(event.target.name === 'CurrentYear') {
+                setState({...state, [event.target.name]: event.target.checked, monthDisabled:false, dateDisabled: false});
+                if(selectedFromDate && selectedToDate) {
                     setValidateState({submit: false});
                 }else{
                     setValidateState({submit: true});
                 }
             }
-            else if(event.target.name == 'checkedB'){
-                setState({...state, [event.target.name]: event.target.checked,yearDisable:false, validateDate: false});
-                if(fromSelectedDate && toSelectedDate) {
+            else if(event.target.name === 'CurrentMonth'){
+                setState({...state, [event.target.name]: event.target.checked,yearDisabled:false, dateDisabled: false});
+                if(selectedFromDate && selectedToDate) {
                     setValidateState({submit: false});
                 }else{
                     setValidateState({submit: true});
@@ -97,97 +132,74 @@ const FormComponent = ({ data }) => {
 
     };
 
-    const activateHandleChange = (event) => {
+    const handleStatusChange = (event) => {
         console.log("changed");
         if(event.target.checked){
             setState({...state, [event.target.name]: event.target.checked,disabled: false});
         }else{
-            let validate = event.target.name == 'checkedC'?state.checkedD?true:false:event.target.name == 'checkedD'?state.checkedC?true:false:false;
+            let validate = event.target.name == 'Activated'?state.NotActivated?true:false:event.target.name == 'NotActivated'?state.Activated?true:false:false;
             setState({...state, [event.target.name]: event.target.checked,disabled: !validate});
         }
 
     };
 
-    const formatTypeChange = (event) => {
+    const handleUserTypeChange = (event) => {
+        setState({ ...state, [event.target.name]: event.target.checked });
+    };
+
+    const handleFormatTypeChange = (event) => {
         setformatTypeValue(event.target.value);
-      console.log(event.target.value);
+        console.log(event.target.value);
     };
-    const [formatTypeValue, setformatTypeValue] = React.useState('DetailedReport');
-
-    const [fromSelectedDate, setFromSelectedDate] = React.useState(new Date());
-
-    const [toSelectedDate, setToSelectedDate] = React.useState(new Date());
-
-    const handleFromDateChange = (date) => {
-        if(date) {
-            setFromSelectedDate(date);
-            if(toSelectedDate) {
-                setValidateState({submit: false});
-            }
-        }else{
-            setValidateState({submit: true});
-            setFromSelectedDate(date);
-        }
-    };
-    const handleToDateChange = (date) => {
-        if(date) {
-            setToSelectedDate(date);
-            if(fromSelectedDate) {
-                setValidateState({submit: false});
-            }
-        }else{
-            setValidateState({submit: true});
-            setToSelectedDate(date);
-        }
-    };
-
-
 
     function handleSubmit(event) {
         event.preventDefault();
-        if(state.checkedA || state.checkedB){
+        console.log( 'data'+JSON.stringify(state)+"-From Date- "+selectedFromDate+
+            "- To Date- "+selectedToDate+"-Format Type - "+formatTypeValue)
+
+        if(state.CurrentYear || state.CurrentMonth){
             const date = new Date();
-            if(state.checkedA){
+            if(state.CurrentYear){
                 // current year
                 const d = new Date(new Date().getFullYear(), 0, 1);
                 const startDate = d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();
                 const endDate = new Date().toISOString().slice(0,10);
-                reqModel.startDate = startDate;
-                reqModel.endDate = endDate;
+                reportData.startDate = startDate;
+                reportData.endDate = endDate;
             }else{
                 // current month
                 const d = new Date(date.getFullYear(), date.getMonth(), 1);
                 const startDate = d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();
                 const endDate = new Date().toISOString().slice(0,10);
-                reqModel.startDate = startDate;
-                reqModel.endDate = endDate;
+                reportData.startDate = startDate;
+                reportData.endDate = endDate;
             }
         }else{
             // range validation
-            const startDate = new Date(fromSelectedDate).toISOString().slice(0,10);
-            const endDate = new Date(toSelectedDate).toISOString().slice(0,10);
-            reqModel.startDate = startDate;
-            reqModel.endDate = endDate;
+            const startDate = new Date(selectedFromDate).toISOString().slice(0,10);
+            const endDate = new Date(selectedToDate).toISOString().slice(0,10);
+            reportData.startDate = startDate;
+            reportData.endDate = endDate;
         }
         // report type format
-        reqModel.reportFormatType = formatTypeValue;
-        reqModel.statusTypes = [];
-        reqModel.userTypes = [];
-        if(state.checkedC)
-            reqModel.statusTypes.push('ActiVated');
-        if(state.checkedC)
-            reqModel.statusTypes.push('NotActivated');
-        if(state.checkedE)
-            reqModel.userTypes.push('Registered&Verified');
-        if(state.checkedF)
-            reqModel.userTypes.push('Registered&NotVerified');
-        if(state.checkedG)
-            reqModel.userTypes.push('Migrated&Verified');
-        if(state.checkedH)
-            reqModel.userTypes.push('Migrated&NotVerified');
+        reportData.reportFormatType = formatTypeValue;
+        reportData.statusTypes = [];
+        reportData.userTypes = [];
+        if(state.Activated)
+            reportData.statusTypes.push('ActiVated');
+        if(state.Activated)
+            reportData.statusTypes.push('NotActivated');
+        if(state.RegisteredVerified)
+            reportData.userTypes.push('RegisteredVerified');
+        if(state.RegisteredNotVerified)
+            reportData.userTypes.push('RegisteredNotVerified');
+        if(state.MigratedVerified)
+            reportData.userTypes.push('MigratedVerified');
+        if(state.MigratedNotVerified)
+            reportData.userTypes.push('MigratedNotVerified');
 
 
-        console.log( 'data'+JSON.stringify(reqModel));
+        console.log( 'data'+JSON.stringify(reportData));
 
         // ..code to submit form to backend here... finally call service with reqModel
 
@@ -198,217 +210,238 @@ const FormComponent = ({ data }) => {
 
     return (
         <form id="userReportForm" onSubmit={handleSubmit}>
-        <div className={classes.div}>
-            <table border="1">
-                <tr>
-                    <td>
-                    </td>
-                    <td colSpan={2}>
-                        <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                            <KeyboardDatePicker
-                                disableToolbar
-                                disabled={state.validateDate}
-                                variant="inline"
-                                format="MM/dd/yyyy"
-                                margin="normal"
-                                id="date-picker-inline"
-                                label="Date picker inline"
-                                onChange={handleFromDateChange}
-                                value={fromSelectedDate}
-                                KeyboardButtonProps={{
-                                    'aria-label': 'change date',
-                                }}
-                                className={classes.date}
-                                minDate={state.today}
-                            />
-                        </MuiPickersUtilsProvider>
-                    </td>
-                    <td colSpan={2}>
-                        <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                            <KeyboardDatePicker
-                                disableToolbar
-                                disabled={state.validateDate}
-                                variant="inline"
-                                format="MM/dd/yyyy"
-                                margin="normal"
-                                id="date-picker-inline"
-                                label="Date picker inline"
-                                value={toSelectedDate}
-                                onChange={handleToDateChange}
-                                KeyboardButtonProps={{
-                                    'aria-label': 'change date',
-                                }}
-                                className={classes.date}
-                                minDate={fromSelectedDate}
-                            />
-                        </MuiPickersUtilsProvider>
-                    </td>
-                </tr>
-                <tr>
-                    <td className={classes.td}><label className={classes.root}>Current Year/Month</label></td><td>
+            <div className={classes.div}>
+                <table border="1">
+                    <thead></thead>
+                    <tbody>
+                    <tr>
+                        <td className={classes.tdFirstCol}>
+                            <label className={classes.root}>Date Range</label>
+                        </td>
+                        <td colSpan={2} className={classes.tdCols}>
+                            <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                                <KeyboardDatePicker
+                                    disableToolbar
+                                    variant="inline"
+                                    format="MM/dd/yyyy"
+                                    margin="normal"
+                                    id="date-picker-inline"
+                                    label="From Date"
+                                    onChange={handleFromDateChange}
+                                    disabled={state.dateDisabled}
+                                    value={selectedFromDate}
+                                    KeyboardButtonProps={{
+                                        'aria-label': 'change date',
+                                    }}
+                                    className={classes.date}
+                                    minDate={selectedFromDate}
+                                    maxDate={state.today}
+                                />
+                            </MuiPickersUtilsProvider>
+                        </td>
+                        <td colSpan={2} className={classes.tdCols}>
+                            <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                                <KeyboardDatePicker
+                                    disableToolbar
+                                    variant="inline"
+                                    format="MM/dd/yyyy"
+                                    margin="normal"
+                                    id="date-picker-inline"
+                                    label="To Date"
+                                    value={selectedToDate}
+                                    onChange={handleToDateChange}
+                                    disabled={state.dateDisabled}
+                                    KeyboardButtonProps={{
+                                        'aria-label': 'change date',
+                                    }}
+                                    className={classes.date}
+                                    minDate={selectedFromDate}
+                                    maxDate={state.today}
+                                />
+                            </MuiPickersUtilsProvider>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td className={classes.tdFirstCol}>
+                            <label className={classes.root}>Current Year/Month</label></td>
+                        <td className={classes.tdCols}>
                             <FormControlLabel
                                 control={
                                     <Checkbox
-                                        checked={state.checkedA}
-                                        onChange={handleCurrentChange}
-                                        name="checkedA"
+                                        checked={state.CurrentYear}
+                                        onChange={handleCurrentYearMonthChange}
+                                        name="CurrentYear"
                                         color="primary"
                                         value="CurrentYear"
-                                        disabled={state.yearDisable}
+                                        disabled={state.yearDisabled}
                                     />
                                 }
-                                label="CurrentYear"
+                                label="Current Year"
                             />
-                </td>
-                    <td colSpan={3}>
+                        </td>
+                        <td colSpan={3} className={classes.tdCols}>
                             <FormControlLabel
                                 control={
                                     <Checkbox
-                                        checked={state.checkedB}
-                                        onChange={handleCurrentChange}
-                                        name="checkedB"
+                                        checked={state.CurrentMonth}
+                                        onChange={handleCurrentYearMonthChange}
+                                        name="CurrentMonth"
                                         color="primary"
                                         value="CurrentMonth"
-                                        disabled={state.monthDisable}
+                                        disabled={state.monthDisabled}
                                     />
                                 }
-                                label="CurrentMonth"
+                                label="Current Month"
                             />
+                        </td>
+                    </tr>
 
-                    </td>
-
-                </tr>
-                <tr>
-                    <td className={classes.td}>
-                        <label className={classes.root}>Status</label></td><td>
-                    <FormControlLabel
-                        control={
-                            <Checkbox
-                                checked={state.checkedC}
-                                onChange={activateHandleChange}
-                                name="checkedC"
-                                color="primary"
-                                value="Activated"
+                    <tr>
+                        <td className={classes.tdFirstCol}>
+                            <label className={classes.root}>Status</label></td>
+                        <td className={classes.tdCols}>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={state.Activated}
+                                        onChange={handleStatusChange}
+                                        name="Activated"
+                                        color="primary"
+                                        value="Activated"
+                                    />
+                                }
+                                label="Activated"
                             />
-                        }
-                        label="Activated"
-                    />
-                </td>
-                    <td colSpan={3}>
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    checked={state.checkedD}
-                                    onChange={activateHandleChange}
-                                    name="checkedD"
+                        </td>
+                        <td colSpan={3} className={classes.tdCols}>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={state.NotActivated}
+                                        onChange={handleStatusChange}
+                                        name="NotActivated"
+                                        color="primary"
+                                        value="NotActivated"
+                                    />
+                                }
+                                label="Not Activated"
+                            />
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td className={classes.tdFirstCol}>
+                            <label className={classes.root}>User Type</label></td>
+                        <td className={classes.tdCols}>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={state.RegisteredVerified}
+                                        onChange={handleUserTypeChange}
+                                        name="RegisteredVerified"
+                                        color="primary"
+                                        value="RegisteredVerified"
+                                        disabled={state.disabled}
+                                    />
+                                }
+                                label="Registered & Verified"
+                            />
+                        </td>
+                        <td className={classes.tdCols}>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={state.RegisteredNotVerified}
+                                        onChange={handleUserTypeChange}
+                                        name="RegisteredNotVerified"
+                                        color="primary"
+                                        value="RegisteredNotVerified"
+                                        disabled={state.disabled}
+                                    />
+                                }
+                                label="Registered & NotVerified"
+                            />
+                        </td>
+                        <td className={classes.tdCols}>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={state.MigratedVerified}
+                                        onChange={handleUserTypeChange}
+                                        name="MigratedVerified"
+                                        color="primary"
+                                        value="MigratedVerified"
+                                        disabled={state.disabled}
+                                    />
+                                }
+                                label="Migrated & Verified"
+                            />
+                        </td>
+                        <td className={classes.tdCols}>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={state.MigratedNotVerified}
+                                        onChange={handleUserTypeChange}
+                                        name="MigratedNotVerified"
+                                        color="primary"
+                                        value="MigratedNotVerified"
+                                        disabled={state.disabled}
+                                    />
+                                }
+                                label="Migrated & NotVerified"
+                            />
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td className={classes.tdFirstCol}>
+                            <label className={classes.root}>Format Type</label></td>
+                        <td colSpan={4} className={classes.tdCols}>
+                            <RadioGroup row onChange={handleFormatTypeChange} value={formatTypeValue}>
+                                <FormControlLabel
+                                    value="SummerizedReport"
+                                    control=
+                                        {<Radio
+                                            color="primary"
+                                            name="SummerizedReport"
+                                            disabled={state.disabled}
+                                        />} label="Summerized Report" />
+                                <FormControlLabel
+                                    value="DetailedReport"
+                                    control=
+                                        {<Radio
+                                            color="primary"
+                                            name="DetailedReport"
+                                            disabled={state.disabled}
+                                        />} label="Detailed Report" />
+                                <FormControlLabel
+                                    value="Zip"
+                                    control=
+                                        {<Radio
+                                            color="primary"
+                                            name="Zip"
+                                            disabled={state.disabled}
+                                        />} label="Zip" />
+                            </RadioGroup>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colSpan={5} className={classes.tdButton}>
+                            <Button className={classes.button} variant="contained"
                                     color="primary"
-                                    value="NotActivated"
-                                />
-                            }
-                            label="NotActivated"
-                        />
-                    </td>
-                </tr>
-                  <tr>
-                      <td className={classes.td}>
-                          <label className={classes.root}>User Type</label></td><td>
-                      <FormControlLabel
-                          control={
-                              <Checkbox
-                                  checked={state.checkedE}
-                                  onChange={handleChange}
-                                  name="checkedE"
-                                  color="primary"
-                                  value="Registered&Verified"
-                                  disabled={state.disabled}
-                              />
-                          }
-                          label="Registered&Verified"
-                      />
-                  </td>
-                      <td>
-                          <FormControlLabel
-                              control={
-                                  <Checkbox
-                                      checked={state.checkedF}
-                                      onChange={handleChange}
-                                      name="checkedF"
-                                      color="primary"
-                                      value="Registered&NotVerified"
-                                      disabled={state.disabled}
-                                  />
-                              }
-                              label="Registered&NotVerified"
-                          />
-                      </td><td>
-                      <FormControlLabel
-                          control={
-                              <Checkbox
-                                  checked={state.checkedG}
-                                  onChange={handleChange}
-                                  name="checkedG"
-                                  color="primary"
-                                  value="Migrated&Verified"
-                                  disabled={state.disabled}
-                              />
-                          }
-                          label="Migrated&Verified"
-                      />
-                  </td><td>
-                      <FormControlLabel
-                          control={
-                              <Checkbox
-                                  checked={state.checkedH}
-                                  onChange={handleChange}
-                                  name="checkedH"
-                                  color="primary"
-                                  value="Migrated&NotVerified"
-                                  disabled={state.disabled}
-                              />
-                          }
-                          label="Migrated&NotVerified"
-                      />
-                  </td>
-                </tr>
-                  <tr>
-                      <td className={classes.td}>
-                          <label className={classes.root}>Format Type</label></td>
-                      <td colSpan={4}>
-                          <RadioGroup row onChange={formatTypeChange} value={formatTypeValue}>
-                              <FormControlLabel
-                                  value="SummerizedReport"
-                                                control=
-                                                    {<Radio
-                                                      color="primary"
-                                                      name="summerizedReport"
-                                                      disabled={state.disabled}
-                                                    />} label="Summerized Report" />
-                              <FormControlLabel
-                                  value="DetailedReport"
-                                  control=
-                                      {<Radio
-                                          color="primary"
-                                          name="detailedReport"
-                                          disabled={state.disabled}
-                                      />} label="Detailed Report" />
-                              <FormControlLabel
-                                  value="Zip"
-                                  control=
-                                      {<Radio
-                                          color="primary"
-                                          name="zip"
-                                          disabled={state.disabled}
-                                      />} label="Zip" />
-                          </RadioGroup>
-                      </td>
-                  </tr>
-                <tr><td colSpan={2} className={classes.border}></td>
-                    <td className={classes.border}><div className={classes.button}><Button variant="contained" color="primary" disabled={validateState.submit || state.disabled} type="submit">
-                        Download
-                    </Button></div></td><td colSpan={2} className={classes.border}></td>
-                </tr>
-            </table>
-        </div>
+                                    name="Download"
+                                    type="submit"
+                                    disabled={validateState.submit || state.disabled}>
+                                Download
+                            </Button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </form>
     );
 };

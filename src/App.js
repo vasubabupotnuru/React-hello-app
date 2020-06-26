@@ -6,6 +6,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import Button from '@material-ui/core/Button';
 import FormComponent from "./components/FormComponent";
+import DateComponent from "./components/DateComponent";
 
 
 
@@ -15,11 +16,8 @@ class AppComponent extends Component{
   render() {
 
      return(<Fragment>
-
-          {/*<Button variant="contained" color="primary" disableElevation>*/}
-          {/*  Disable elevation*/}
-          {/*</Button>*/}
-        <FormComponent></FormComponent>
+             <DateComponent></DateComponent>
+        {/*<FormComponent></FormComponent>*/}
 
          </Fragment>
     );
