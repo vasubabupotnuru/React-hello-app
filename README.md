@@ -68,6 +68,168 @@ This section has moved here: https://facebook.github.io/create-react-app/docs/de
 This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
 
 
+##### ZIp modifications --- 07/07/2020
+
+Modifications in class UsersDetailExcelReportGenerator.java file
+
+
+	@Override
+	public InputStreamResource getInputStreamResource (UserReportResponse reportResponse) throws IOException {
+	return reportResponse.getReportDetailsList().size() > 0
+			&& (reportResponse.getErrorMessage() == null || reportResponse.getErrorMessage().isEmpty()) ?
+	// this line 
+					new InputStreamResource (getInputStream(usersTOExcel (reportResponse.getReportDetailsList()))) : null;
+	}
+	
+	// changes return type to workbook
+	
+	// this line
+	public Workbook usersTOExcel(List<UserReportDetails> userReportDetails) throws IOException {
+		final Workbook workbook = new XSSFWorkbook();
+		Sheet sheet = workbook.createSheet("UsersDetailReport");
+		setColumnswidth(sheet);
+		createSheetHeader (workbook, sheet);
+		createSheetBody(userReportDetails, sheet);
+	// this line 
+		return workbook;
+	}
+
+####################################################################################3
+
+changes in UsersSummaryExcelReportGenerator.java file 
+
+
+
+private static final String[] SHEET_COLUMNS = {"Activated?", "Migrated?", "FP Verfied?", "Count"};
+	private static final int DEFAULT_COLUMN_WIDTH = 25;
+	private int total=0;
+
+	// add these two lines
+	@Autowired
+	UserMgmtPortalReportService userMgmtPortalReportService;
+
+	@Override
+	public InputStreamResource getInputStreamResource (UserReportResponse reportResponse) throws IOException {
+		total=reportResponse.getReportDetailsList().size();
+		
+	// this line also
+		reportResponse.setSummaryList(userMgmtPortalReportService.retrieveUserDetailsSummery(reportResponse));
+		
+		return reportResponse.getSummaryList().size() > 0
+				&& (reportResponse.getErrorMessage() == null || reportResponse.getErrorMessage().isEmpty()) ?
+				new InputStreamResource (usersTOExcel (reportResponse.getSummaryList())) : null;
+	}
+
+
+##############################################################################################################################################
+comment these lines in UserMgmtPortalReportsController.java file
+
+
+@PostMapping (value="/usersReport")
+	public ResponseEntity<?> generateReport(@RequestBody UsersReportSearchDetails reportSearchDetails) throws IOException {
+		final ReportGenerator reportGenerator = reportGeneratorFactory.getFileGenerator(reportSearchDetails.getReportFormatType());
+		if (reportGenerator != null) {
+			 Optional<UserReportResponse> reportResponse = userMgmtPortalReportService.retrieveUserDetailsByCriteria(reportSearchDetails);
+			//valuee => report generated valuel => userReportResponse with error message, when there is exception
+			
+		// comment these lines 
+			/*if(reportSearchDetails.getReportFormatType().equals(ReportTypeEnum.USERS_REPORT_SUMMARY_EXCEL.getReportType())){
+				reportResponse.orElse(null).setSummaryList(userMgmtPortalReportService.retrieveUserDetailsSummery(reportResponse.orElse(null)));
+			}*/
+			
+			
+			Pair<InputStreamSource, UserReportResponse> pairReportOrErrorResponse = reportGenerator.generateReport(reportResponse.orElse(null));
+			return pairReportOrErrorResponse.getValue0() != null ?
+					ResponseEntity.ok()
+						.headers(getHttpHeaders(reportGenerator.getReportName(reportSearchDetails.getReportFormatType())))
+						.body(pairReportOrErrorResponse.getValue0()):
+					ResponseEntity.badRequest()
+						.body (pairReportOrErrorResponse.getValue1());
+		} else {
+			return ResponseEntity.badRequest()
+					.body (new UserReportResponse(SC_BAD_REQUEST,
+							"No file generators matching the report reportFormatType or " +
+							"at least one report Type must be specified by the user or invalid reportType"));
+		}
+	}
+
+###################################################################################################################################333
+Replace Complete file ReportGenerator.java file
+
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.javatuples.Pair;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.InputStreamSource;
+import org.springframework.stereotype.Component;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
+
+
+@Component
+public class ZipReportGenerator implements ReportGenerator {
+
+	@Autowired
+	UsersDetailExcelReportGenerator usersDetailExcelReportGenerator;
+
+	@Override
+	public InputStreamResource getInputStreamResource (UserReportResponse reportResponse) throws IOException {
+		Workbook workbook = usersDetailExcelReportGenerator.usersTOExcel(reportResponse.getReportDetailsList());
+
+		return reportResponse.getReportDetailsList().size() > 0
+				&& (reportResponse.getErrorMessage() == null || reportResponse.getErrorMessage().isEmpty()) ?
+				new InputStreamResource (getZipStream (workbook,reportResponse)): null;
+	}
+
+	private InputStream getZipStream(Workbook workbook, UserReportResponse reportResponse) throws IOException{
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		ZipOutputStream zipOutputStream = new ZipOutputStream(out);
+
+		// Adding excel report to zip
+		ByteArrayOutputStream workbookByteArrayStream= new ByteArrayOutputStream();;
+		ZipEntry zipEntry = new ZipEntry("report.xlsx");
+		zipOutputStream.putNextEntry(zipEntry);
+		workbook.write(workbookByteArrayStream);
+		zipEntry.setSize(workbookByteArrayStream.size());
+		zipOutputStream.write(workbookByteArrayStream.toByteArray());
+		zipOutputStream.closeEntry();
+		// End of adding excel
+
+		// Adding json to report to zip
+		ByteArrayOutputStream jsonByteArrayStream= new ByteArrayOutputStream();;
+		ZipEntry zipEntryForJosn = new ZipEntry("report.json");
+		zipOutputStream.putNextEntry(zipEntryForJosn);
+		ObjectMapper mapper = new ObjectMapper ();
+		mapper.writeValue (jsonByteArrayStream, reportResponse.getReportDetailsList());
+		zipEntryForJosn.setSize(jsonByteArrayStream.size());
+		zipOutputStream.write(jsonByteArrayStream.toByteArray());
+		zipOutputStream.closeEntry();
+		// End of adding excel
+
+		zipOutputStream.close();
+		return new ByteArrayInputStream(out.toByteArray());
+	}
+
+	@Override
+	public String getFileGeneratorType() {
+		return USERS_REPORTS_ZIP.getReportType();
+	}
+} 
+
+
+
+######################################END################################################################
+
+
+
 
 ### Actual code-splitting vasu
 
