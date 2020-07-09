@@ -95,9 +95,9 @@ const UserReportComponent = ({ data }) => {
 
         console.log( 'data'+JSON.stringify(reportData));
 
-        const url = "https://curl.haxx.se/libcurl/c/allexamples.zip";
+        const url = "http://localhost:8080/v1/download/usersReport";
 
-        // fetch(url)
+        // fetch(url)   // https://curl.haxx.se/libcurl/c/allexamples.zip
         //     .then(Response => Response.json())
         //     .then(findResponse => {
         //         console.log(findResponse);
@@ -114,23 +114,23 @@ const UserReportComponent = ({ data }) => {
                 method: "POST",
                 headers: { "Content-Type": "application/json"},
                 body:JSON.stringify(reportData),
-            }).then(response => {
-            // const filename = response.headers.get('Content-Disposition').split('filename=')[1];
-            // const filename1 = response.headers;
-            // console.log(filename1);
-            response.blob()
+            }).then(res => {
+            const filename = res.headers; //.get('Content-Disposition').split('filename=')[0];
+             const filename1 = res.url;
+             console.log(filename1);
+            res.blob()
                 .then(response => {
                     const url = window.URL.createObjectURL(new Blob([response]));
                     const link = document.createElement('a');
                     link.href = url;
-                    // link.download = filename;
-                    // link.click();
-                    //link.removeChild(link);
+                     link.download = filename;
+                     link.click();
+                    link.removeChild(link);
 
-                    link.setAttribute('download', 'file.zip'); //or any other extension
-                    document.body.appendChild(link);
-                    link.click();
-                    link.parentNode.removeChild(link);
+                    // link.setAttribute('download', 'file.zip'); //or any other extension
+                    // document.body.appendChild(link);
+                    // link.click();
+                    // link.parentNode.removeChild(link);
                 });
         });
 
@@ -158,14 +158,16 @@ const UserReportComponent = ({ data }) => {
                                             setValidateState={setValidateState}
                                             setState={setState}
                                             selectedFromDate={selectedFromDate}
-                                            setSelectedToDate={setSelectedToDate}
+                                            selectedToDate={selectedToDate}
                                             validateState={validateState}
                         />
                         <UserStatusComponent setState={setState}
                                              state={state}
                         />
                         <UserTypeComponent setState={setState}
-                                           state={state}/>
+                                           state={state}
+                                           validateState={validateState}
+                                           setValidateState={setValidateState}/>
                         <FormatTypeComponent state={state}
                                              formatTypeValue={formatTypeValue}
                                              setformatTypeValue={setformatTypeValue}

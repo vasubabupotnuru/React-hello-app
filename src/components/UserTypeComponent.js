@@ -19,12 +19,32 @@ const useStyles = makeStyles({
 });
 
 export const UserTypeComponent = ({   state,
-                                      setState
+                                      setState,
+                                      validateState,
+                                      setValidateState
                                         }) => {
     const classes = useStyles();
     const handleUserTypeChange = (event) => {
-        setState({ ...state, [event.target.name]: event.target.checked });
+        if(event.target.checked) {
+            setState({...state, [event.target.name]: event.target.checked});
+            setValidateState({submit: false});
+        }
+        else{
+            let condArr = [state.RegisteredNotVerified,state.RegisteredVerified,state.MigratedNotVerified,state.MigratedVerified];
+            let increment = 0;
+            condArr.forEach(element => {
+                if(element){
+                    increment++;
+                }
+            });
+            let validate = increment == 1 ? true:false;
+            setState({...state, [event.target.name]: event.target.checked});
+            setValidateState({submit: validate});
+        }
     };
+
+
+
     return (
         <tr>
             <td className={classes.tdFirstCol}>
