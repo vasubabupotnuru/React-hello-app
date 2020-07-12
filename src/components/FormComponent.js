@@ -126,10 +126,8 @@ const FormComponent = ({ data }) => {
                 }else{
                     setValidateState({submit: true});
                 }
-
             }
         }
-
     };
 
     const handleStatusChange = (event) => {

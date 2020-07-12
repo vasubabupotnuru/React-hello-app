@@ -109,28 +109,21 @@ const UserReportComponent = ({ data }) => {
         //     data = response.json();
         // }
 
+
+
         fetch(url,
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json"},
                 body:JSON.stringify(reportData),
             }).then(res => {
-            const filename = res.headers; //.get('Content-Disposition').split('filename=')[0];
-             const filename1 = res.url;
-             console.log(filename1);
-            res.blob()
-                .then(response => {
-                    const url = window.URL.createObjectURL(new Blob([response]));
-                    const link = document.createElement('a');
-                    link.href = url;
-                     link.download = filename;
-                     link.click();
-                    link.removeChild(link);
-
-                    // link.setAttribute('download', 'file.zip'); //or any other extension
-                    // document.body.appendChild(link);
-                    // link.click();
-                    // link.parentNode.removeChild(link);
+            const filename =  res.headers.get('Content-Disposition').split('filename=')[1];
+            res.blob().then(blob => {
+                let url = window.URL.createObjectURL(blob);
+                let a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                a.click();
                 });
         });
 
