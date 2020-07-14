@@ -26,7 +26,7 @@ export const UserTypeComponent = ({   state,
     const classes = useStyles();
     const handleUserTypeChange = (event) => {
         if(event.target.checked) {
-            setState({...state, [event.target.name]: event.target.checked});
+            setState({...state, [event.target.name]: event.target.checked,monthDisabled:false,yearDisabled:false});
             setValidateState({submit: false});
         }
         else{
@@ -38,7 +38,7 @@ export const UserTypeComponent = ({   state,
                 }
             });
             let validate = increment == 1 ? true:false;
-            setState({...state, [event.target.name]: event.target.checked});
+            setState({...state, [event.target.name]: event.target.checked,monthDisabled:validate,yearDisabled:validate});
             setValidateState({submit: validate});
         }
     };
