@@ -117,6 +117,9 @@ const UserReportComponent = ({ data }) => {
                 headers: { "Content-Type": "application/json"},
                 body:JSON.stringify(reportData),
             }).then(res => {
+            if(!res.ok){
+                alert("no Data");
+            }
             const filename =  res.headers.get('Content-Disposition').split('filename=')[1];
             res.blob().then(blob => {
                 let url = window.URL.createObjectURL(blob);
