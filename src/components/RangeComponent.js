@@ -36,25 +36,29 @@ export const RangeComponent = ({       setSelectedFromDate,
     const classes = useStyles();
 
     const handleFromDateChange = (date) => {
-        if(date.getDate()) {
-            setSelectedFromDate(date);
-            if(selectedToDate) {
-                setValidateState({submit: false});
+        if(date) {
+            if (date.getDate()) {
+                setSelectedFromDate(date);
+                if (selectedToDate) {
+                    setValidateState({submit: false});
+                }
+            } else {
+                setValidateState({submit: true});
+                setSelectedFromDate(date);
             }
-        }else{
-            setValidateState({submit: true});
-            setSelectedFromDate(date);
         }
     };
     const handleToDateChange = (date) => {
-        if(date.getDate()) {
-            setSelectedToDate(date);
-            if(selectedFromDate) {
-                setValidateState({submit: false});
+        if(date) {
+            if (date.getDate()) {
+                setSelectedToDate(date);
+                if (selectedFromDate) {
+                    setValidateState({submit: false});
+                }
+            } else {
+                setValidateState({submit: true});
+                setSelectedToDate(date);
             }
-        }else{
-            setValidateState({submit: true});
-            setSelectedToDate(date);
         }
     };
 
