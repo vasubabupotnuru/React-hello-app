@@ -6,6 +6,12 @@ import {UserStatusComponent} from "./UserStatusComponent";
 import {UserTypeComponent} from "./UserTypeComponent";
 import {FormatTypeComponent} from "./FormatTypeComponent";
 import {ReportSubmitComponent} from "./ReportSubmitComponent";
+import Dialog from "@material-ui/core/Dialog";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogActions from "@material-ui/core/DialogActions";
+import Button from "@material-ui/core/Button";
 
 const useStyles = makeStyles({
     div:{
@@ -46,7 +52,19 @@ const UserReportComponent = ({ data }) => {
     })
     const [formatTypeValue, setformatTypeValue] = React.useState('DetailedReport');
 
+    const [open, setOpen] = React.useState(false);
+
+
+    const handleClickOpen = () => {
+        setOpen(true);
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+    };
+
     function handleSubmit(event) {
+
         event.preventDefault();
         // console.log( 'data'+JSON.stringify(state)+"-From Date- "+selectedFromDate+
         //     "- To Date- "+selectedToDate+"-Format Type - "+formatTypeValue)
@@ -95,7 +113,7 @@ const UserReportComponent = ({ data }) => {
 
         console.log( 'data'+JSON.stringify(reportData));
 
-        const url = "http://localhost:8080/v1/download/usersReport";
+        const url = "https://curl.haxx.se/libcurl/c/allexamples.zip";
 
         // fetch(url)   // https://curl.haxx.se/libcurl/c/allexamples.zip
         //     .then(Response => Response.json())
@@ -117,17 +135,19 @@ const UserReportComponent = ({ data }) => {
                 headers: { "Content-Type": "application/json"},
                 body:JSON.stringify(reportData),
             }).then(res => {
+
             if(!res.ok){
                 alert("no Data");
             }
-            const filename =  res.headers.get('Content-Disposition').split('filename=')[1];
+            handleClickOpen();
+           /* const filename =  res.headers.get('Content-Disposition').split('filename=')[1];
             res.blob().then(blob => {
                 let url = window.URL.createObjectURL(blob);
                 let a = document.createElement('a');
                 a.href = url;
                 a.download = filename;
                 a.click();
-                });
+                });*/
         });
 
         // ..code to submit form to backend here... finally call service with reqModel
@@ -171,6 +191,27 @@ const UserReportComponent = ({ data }) => {
                         <ReportSubmitComponent state={state}
                                                validateState={validateState}
                         />
+                        <tr>
+                            <div>
+                                <Dialog
+                                    open={open}
+                                    onClose={handleClose}
+                                    aria-labelledby="alert-dialog-title"
+                                    aria-describedby="alert-dialog-description">
+                                   {/* <DialogTitle id="alert-dialog-title">{"Alert!"}</DialogTitle>*/}
+                                    <DialogContent>
+                                        <DialogContentText id="alert-dialog-description">
+                                            No Data Found!
+                                        </DialogContentText>
+                                    </DialogContent>
+                                    <DialogActions>
+                                        <Button onClick={handleClose} color="primary" autoFocus>
+                                            Close
+                                        </Button>
+                                    </DialogActions>
+                                </Dialog>
+                            </div>
+                        </tr>
                         </tbody>
                     </table>
                 </div>
