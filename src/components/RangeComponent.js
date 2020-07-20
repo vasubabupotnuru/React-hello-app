@@ -31,13 +31,15 @@ export const RangeComponent = ({       setSelectedFromDate,
                                        setSelectedToDate,
                                        state,
                                        setValidateState,
-                                       validateState
+                                       validateState,
+                                       setSelectedMinDate,
+                                       selectedMinDate
                                    }) => {
     const classes = useStyles();
 
     const handleFromDateChange = (date) => {
         if(date) {
-            if (date.getDate()) {
+            if (date.getDate() && date <=  new Date() && date >= selectedMinDate) {
                 setSelectedFromDate(date);
                 if (selectedToDate) {
                     setValidateState({submit: false});
@@ -50,7 +52,7 @@ export const RangeComponent = ({       setSelectedFromDate,
     };
     const handleToDateChange = (date) => {
         if(date) {
-            if (date.getDate()) {
+            if (date.getDate() && date >= selectedMinDate && selectedFromDate <= date && date <=  new Date()) {
                 setSelectedToDate(date);
                 if (selectedFromDate) {
                     setValidateState({submit: false});
@@ -83,7 +85,7 @@ export const RangeComponent = ({       setSelectedFromDate,
                             "aria-label": "change date",
                         }}
                         className={classes.date}
-                        minDate={selectedFromDate}
+                        minDate={selectedMinDate}
                         maxDate={state.today}
                     />
                 </MuiPickersUtilsProvider>
