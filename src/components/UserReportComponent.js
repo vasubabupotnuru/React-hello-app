@@ -46,6 +46,7 @@ const UserReportComponent = ({ data }) => {
 
     });
     const [selectedFromDate, setSelectedFromDate] = React.useState(new Date('11/22/2019'));
+    const [selectedMinDate, setSelectedMinDate] = React.useState(new Date('11/22/2019'));
     const [selectedToDate, setSelectedToDate] = React.useState(new Date());
     const [validateState, setValidateState] = React.useState({
         submit:false
@@ -168,6 +169,8 @@ const UserReportComponent = ({ data }) => {
                                         state={state}
                                         setValidateState={setValidateState}
                                         validateState={validateState}
+                                        selectedMinDate = {selectedMinDate}
+                                        setSelectedMinDate = {setSelectedMinDate}
                         />
                         <YearMonthComponent state={state}
                                             validateState={validateState}
