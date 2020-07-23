@@ -68,161 +68,192 @@ This section has moved here: https://facebook.github.io/create-react-app/docs/de
 This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
 
 
-##### ZIp modifications --- 07/07/2020
+##### Color pelette  modifications --- 23/07/2020 ---- UsersSummaryExcelReportGenerator.java
 
-Modifications in class UsersDetailExcelReportGenerator.java file
+// check all functions andi 
 
-
-	@Override
-	public InputStreamResource getInputStreamResource (UserReportResponse reportResponse) throws IOException {
-	return reportResponse.getReportDetailsList().size() > 0
-			&& (reportResponse.getErrorMessage() == null || reportResponse.getErrorMessage().isEmpty()) ?
-	// this line 
-					new InputStreamResource (getInputStream(usersTOExcel (reportResponse.getReportDetailsList()))) : null;
-	}
-	
-	// changes return type to workbook
-	
-	// this line
-	public Workbook usersTOExcel(List<UserReportDetails> userReportDetails) throws IOException {
-		final Workbook workbook = new XSSFWorkbook();
-		Sheet sheet = workbook.createSheet("UsersDetailReport");
-		setColumnswidth(sheet);
-		createSheetHeader (workbook, sheet);
-		createSheetBody(userReportDetails, sheet);
-	// this line 
-		return workbook;
-	}
-
-####################################################################################3
-
-changes in UsersSummaryExcelReportGenerator.java file 
-
-
-
-private static final String[] SHEET_COLUMNS = {"Activated?", "Migrated?", "FP Verfied?", "Count"};
+	private static final String[] SHEET_COLUMNS = {"Activated?", "Migrated?", "FP Verfied?", "Count"};
 	private static final int DEFAULT_COLUMN_WIDTH = 25;
 	private int total=0;
 
-	// add these two lines
-	@Autowired
-	UserMgmtPortalReportService userMgmtPortalReportService;
-
+	XSSFCellStyle centerAlignment;
+	XSSFCellStyle oddRow;
+	XSSFCellStyle evenRow;
+	XSSFCellStyle centerAlignmentWithBold;
+	Font font;
+	Font headerFont;
+	
+	
+	
+	
 	@Override
 	public InputStreamResource getInputStreamResource (UserReportResponse reportResponse) throws IOException {
 		total=reportResponse.getReportDetailsList().size();
-		
-	// this line also
 		reportResponse.setSummaryList(userMgmtPortalReportService.retrieveUserDetailsSummery(reportResponse));
-		
 		return reportResponse.getSummaryList().size() > 0
 				&& (reportResponse.getErrorMessage() == null || reportResponse.getErrorMessage().isEmpty()) ?
 				new InputStreamResource (usersTOExcel (reportResponse.getSummaryList())) : null;
 	}
-
-
-##############################################################################################################################################
-comment these lines in UserMgmtPortalReportsController.java file
-
-
-@PostMapping (value="/usersReport")
-	public ResponseEntity<?> generateReport(@RequestBody UsersReportSearchDetails reportSearchDetails) throws IOException {
-		final ReportGenerator reportGenerator = reportGeneratorFactory.getFileGenerator(reportSearchDetails.getReportFormatType());
-		if (reportGenerator != null) {
-			 Optional<UserReportResponse> reportResponse = userMgmtPortalReportService.retrieveUserDetailsByCriteria(reportSearchDetails);
-			//valuee => report generated valuel => userReportResponse with error message, when there is exception
-			
-		// comment these lines 
-			/*if(reportSearchDetails.getReportFormatType().equals(ReportTypeEnum.USERS_REPORT_SUMMARY_EXCEL.getReportType())){
-				reportResponse.orElse(null).setSummaryList(userMgmtPortalReportService.retrieveUserDetailsSummery(reportResponse.orElse(null)));
-			}*/
-			
-			
-			Pair<InputStreamSource, UserReportResponse> pairReportOrErrorResponse = reportGenerator.generateReport(reportResponse.orElse(null));
-			return pairReportOrErrorResponse.getValue0() != null ?
-					ResponseEntity.ok()
-						.headers(getHttpHeaders(reportGenerator.getReportName(reportSearchDetails.getReportFormatType())))
-						.body(pairReportOrErrorResponse.getValue0()):
-					ResponseEntity.badRequest()
-						.body (pairReportOrErrorResponse.getValue1());
-		} else {
-			return ResponseEntity.badRequest()
-					.body (new UserReportResponse(SC_BAD_REQUEST,
-							"No file generators matching the report reportFormatType or " +
-							"at least one report Type must be specified by the user or invalid reportType"));
+	public InputStream usersTOExcel(List<UserSummary> summaryList) throws IOException {
+		final Workbook workbook = new XSSFWorkbook();
+		prerequisites(workbook);
+		Sheet sheet = workbook.createSheet("SummaryReport");
+		setColumnswidth(sheet);
+		createSheetHeader (workbook, sheet);
+		createSheetBody(summaryList, sheet);
+		return getInputStream(workbook);
+	}
+	private void createSheetHeader (Workbook workbook, Sheet sheet) {
+		Row headerRow = sheet.createRow(0);
+		for (int col = 0; col < SHEET_COLUMNS.length; col++) {
+			Cell cell = headerRow.createCell(col);
+			cell.setCellValue(SHEET_COLUMNS[col]);
+			cell.setCellStyle(getCellstyle(workbook));
 		}
 	}
 
-###################################################################################################################################333
-Replace Complete file ReportGenerator.java file
+	private void prerequisites(Workbook workbook) {
+		centerAlignment =(XSSFCellStyle) workbook.createCellStyle();
+		centerAlignment.setAlignment(HorizontalAlignment.CENTER);
+		try {
+			byte[] rgbB = Hex.decodeHex("CCCCFF"); // get byte array from hex string
+			XSSFColor color = new XSSFColor(rgbB, null); //IndexedColorMap has no usage until now. So it can be set null.
+			centerAlignment.setFillForegroundColor(color);
+			centerAlignment.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+		}catch (Exception e){
 
+		}
+		setFont(workbook);
+		centerAlignmentWithBold =(XSSFCellStyle) workbook.createCellStyle();
+		centerAlignmentWithBold.setAlignment(HorizontalAlignment.CENTER);
+		centerAlignmentWithBold.setFont(font);
+		try {
+			byte[] rgbB = Hex.decodeHex("B3B3FF"); // get byte array from hex string
+			XSSFColor color = new XSSFColor(rgbB, null); //IndexedColorMap has no usage until now. So it can be set null.
+			centerAlignmentWithBold.setFillForegroundColor(color);
+			centerAlignmentWithBold.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+		}catch (Exception e){
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.javatuples.Pair;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.InputStreamSource;
-import org.springframework.stereotype.Component;
+		}
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+		oddRow = (XSSFCellStyle) workbook.createCellStyle();
+		try {
+			byte[] rgbB = Hex.decodeHex("CCCCFF"); // get byte array from hex string
+			XSSFColor color = new XSSFColor(rgbB, null); //IndexedColorMap has no usage until now. So it can be set null.
+			oddRow.setFillForegroundColor(color);
+			oddRow.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+		}catch (Exception e){
 
+		}
+		evenRow = (XSSFCellStyle) workbook.createCellStyle();
+		try {
+			byte[] rgbB = Hex.decodeHex("B3B3FF"); // get byte array from hex string
+			XSSFColor color = new XSSFColor(rgbB, null); //IndexedColorMap has no usage until now. So it can be set null.
+			evenRow.setFillForegroundColor(color);
+			evenRow.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+		}catch (Exception e){
 
-
-@Component
-public class ZipReportGenerator implements ReportGenerator {
-
-	@Autowired
-	UsersDetailExcelReportGenerator usersDetailExcelReportGenerator;
-
-	@Override
-	public InputStreamResource getInputStreamResource (UserReportResponse reportResponse) throws IOException {
-		Workbook workbook = usersDetailExcelReportGenerator.usersTOExcel(reportResponse.getReportDetailsList());
-
-		return reportResponse.getReportDetailsList().size() > 0
-				&& (reportResponse.getErrorMessage() == null || reportResponse.getErrorMessage().isEmpty()) ?
-				new InputStreamResource (getZipStream (workbook,reportResponse)): null;
+		}
 	}
 
-	private InputStream getZipStream(Workbook workbook, UserReportResponse reportResponse) throws IOException{
+	private void createSheetBody (List<UserSummary> summaryList, Sheet sheet) {
+		int rowIdx = 1;
+		int mergeIndex=1;
+		Row row;
+		for (UserSummary summaryReport : summaryList) {
+			if(rowIdx>2 && summaryReport.getActivated().length()>0){
+				mergeRegion(sheet,mergeIndex,rowIdx-1,0,0);
+				sheet.createRow(rowIdx++);
+				mergeIndex=rowIdx;
+			}
+			row = sheet.createRow(rowIdx++);
+			fillUserSummary(rowIdx,row, summaryReport);
+		}
+		mergeRegion(sheet,mergeIndex,rowIdx-1,0,0);
+		sheet.createRow(rowIdx++);
+		fillGrandTotal(sheet.createRow(rowIdx++));
+		mergeRegion(sheet,rowIdx-1,rowIdx-1,0,2);
+	}
+	private void mergeRegion(Sheet sheet,int firstRow,int lastRow,int firstColumn,int lastColumn) {
+		sheet.addMergedRegion(new CellRangeAddress(
+				firstRow, //first row (0-based)
+				lastRow, //last row  (0-based)
+				firstColumn, //first column (0-based)
+				lastColumn  //last column  (0-based)
+		));
+
+	}
+	private InputStream getInputStream(Workbook workbook) throws IOException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		ZipOutputStream zipOutputStream = new ZipOutputStream(out);
-
-		// Adding excel report to zip
-		ByteArrayOutputStream workbookByteArrayStream= new ByteArrayOutputStream();;
-		ZipEntry zipEntry = new ZipEntry("report.xlsx");
-		zipOutputStream.putNextEntry(zipEntry);
-		workbook.write(workbookByteArrayStream);
-		zipEntry.setSize(workbookByteArrayStream.size());
-		zipOutputStream.write(workbookByteArrayStream.toByteArray());
-		zipOutputStream.closeEntry();
-		// End of adding excel
-
-		// Adding json to report to zip
-		ByteArrayOutputStream jsonByteArrayStream= new ByteArrayOutputStream();;
-		ZipEntry zipEntryForJosn = new ZipEntry("report.json");
-		zipOutputStream.putNextEntry(zipEntryForJosn);
-		ObjectMapper mapper = new ObjectMapper ();
-		mapper.writeValue (jsonByteArrayStream, reportResponse.getReportDetailsList());
-		zipEntryForJosn.setSize(jsonByteArrayStream.size());
-		zipOutputStream.write(jsonByteArrayStream.toByteArray());
-		zipOutputStream.closeEntry();
-		// End of adding excel
-
-		zipOutputStream.close();
+		workbook.write(out);
 		return new ByteArrayInputStream(out.toByteArray());
 	}
+	private CellStyle getCellstyle(Workbook workbook) {
+		XSSFCellStyle headerCellstyle =(XSSFCellStyle) workbook.createCellStyle();
+		headerCellstyle.setAlignment(HorizontalAlignment.CENTER);
+		headerCellstyle.setFont (headerFont);
+		try {
+			byte[] rgbB = Hex.decodeHex("3333FF"); // get byte array from hex string
+			XSSFColor color = new XSSFColor(rgbB, null); //IndexedColorMap has no usage until now. So it can be set null.
+//			centerAlignment.setFillBackgroundColor(color);
+			headerCellstyle.setFillForegroundColor(color);
+			headerCellstyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+		}catch (Exception e){
 
+		}
+		return headerCellstyle;
+	}
+	private Font setFont(Workbook workbook) {
+		font = workbook.createFont();
+		headerFont = workbook.createFont();
+		font.setBold(true);
+		headerFont.setColor(IndexedColors.WHITE.getIndex());
+		return font;
+	}
+	private Font getFontForHeader (Workbook workbook) {
+		Font font = workbook.createFont();
+		font.setBold(true);
+		font.setColor(IndexedColors.BLACK.getIndex());
+		return font;
+	}
+	private void fillUserSummary (int index,Row row, UserSummary summaryReport) {
+		Cell cell = row.createCell(0);
+		cell.setCellValue(summaryReport.getActivated());
+		cell.setCellStyle(centerAlignment);
+
+		cell = row.createCell(1);
+		cell.setCellValue(summaryReport.getMigrated());
+		cell.setCellStyle(index%2==0?evenRow:oddRow);
+
+		cell = row.createCell(2);
+		cell.setCellValue(summaryReport.getFpVerified());
+		cell.setCellStyle(index%2==0?evenRow:oddRow);
+
+		cell = row.createCell(3);
+		cell.setCellValue(summaryReport.getCount());
+		cell.setCellStyle(centerAlignment);
+
+	}
+	private void fillGrandTotal (Row row) {
+		Cell cell = row.createCell(0);
+		cell.setCellValue("Grand Total");
+		cell.setCellStyle(centerAlignmentWithBold);
+
+		cell = row.createCell(3);
+		cell.setCellValue(total);
+
+		cell.setCellStyle(centerAlignmentWithBold);
+
+	}
+	private void setColumnswidth(Sheet sheet) {
+		sheet.setDefaultColumnWidth(DEFAULT_COLUMN_WIDTH);
+	}
 	@Override
 	public String getFileGeneratorType() {
-		return USERS_REPORTS_ZIP.getReportType();
+		return USERS_REPORT_SUMMARY_EXCEL.getReportType();
 	}
-} 
+	
+	
 
 
 
