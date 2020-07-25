@@ -12,11 +12,18 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogActions from "@material-ui/core/DialogActions";
 import Button from "@material-ui/core/Button";
+import LinearProgress from "@material-ui/core/LinearProgress";
 
 const useStyles = makeStyles({
     div:{
         maxWidth: 1000,
         margin: "auto"
+    },
+    errMsg:{
+      textAlign: "center"
+    },
+    root: {
+        width: '100%',
     }
 });
 
@@ -65,7 +72,7 @@ const UserReportComponent = ({ data }) => {
     };
 
     function handleSubmit(event) {
-
+        setValidateState({submit: true});
         event.preventDefault();
         // console.log( 'data'+JSON.stringify(state)+"-From Date- "+selectedFromDate+
         //     "- To Date- "+selectedToDate+"-Format Type - "+formatTypeValue)
@@ -136,11 +143,12 @@ const UserReportComponent = ({ data }) => {
                 headers: { "Content-Type": "application/json"},
                 body:JSON.stringify(reportData),
             }).then(res => {
-
-            if(!res.ok){
-                alert("no Data");
-            }
+            setValidateState({submit: false});
             handleClickOpen();
+            if(!res.ok){
+                // alert("no Data");
+            }
+
            /* const filename =  res.headers.get('Content-Disposition').split('filename=')[1];
             res.blob().then(blob => {
                 let url = window.URL.createObjectURL(blob);
@@ -217,6 +225,10 @@ const UserReportComponent = ({ data }) => {
                         </tr>
                         </tbody>
                     </table>
+                    <div className={classes.root} hidden={!validateState.submit} >
+                        <LinearProgress />
+                        <div className={classes.errMsg}>Please Wait..</div>
+                    </div>
                 </div>
             </form>
         );
