@@ -58,6 +58,9 @@ const UserReportComponent = ({ data }) => {
     const [validateState, setValidateState] = React.useState({
         submit:false
     })
+    const [respState, setRespState] = React.useState({
+        resp:false
+    })
     const [formatTypeValue, setformatTypeValue] = React.useState('DetailedReport');
 
     const [open, setOpen] = React.useState(false);
@@ -72,6 +75,7 @@ const UserReportComponent = ({ data }) => {
     };
 
     function handleSubmit(event) {
+        setRespState({resp: true});
         setValidateState({submit: true});
         event.preventDefault();
         // console.log( 'data'+JSON.stringify(state)+"-From Date- "+selectedFromDate+
@@ -143,7 +147,8 @@ const UserReportComponent = ({ data }) => {
                 headers: { "Content-Type": "application/json"},
                 body:JSON.stringify(reportData),
             }).then(res => {
-            setValidateState({submit: false});
+                setValidateState({submit: false});
+            setRespState({resp: false});
             handleClickOpen();
             if(!res.ok){
                 // alert("no Data");
@@ -225,7 +230,7 @@ const UserReportComponent = ({ data }) => {
                         </tr>
                         </tbody>
                     </table>
-                    <div className={classes.root} hidden={!validateState.submit} >
+                    <div className={classes.root} hidden={!respState.resp} >
                         <LinearProgress />
                         <div className={classes.errMsg}>Please Wait..</div>
                     </div>
