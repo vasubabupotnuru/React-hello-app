@@ -24,7 +24,11 @@ const useStyles = makeStyles({
     },
     root: {
         width: '100%',
-    }
+    },
+    errMsgDiv:{
+        textAlign: "center",
+        color: "red"
+    },
 });
 
 const reportData = {
@@ -49,7 +53,9 @@ const UserReportComponent = ({ data }) => {
         dateDisabled: false, //dateDisabled
         monthDisabled: false,  //monthDisabled
         yearDisabled: false, //yearDisabled
-        today: new Date()
+        today: new Date(),
+        errMsgDiv : true,
+        errMessage : ''
 
     });
     const [selectedFromDate, setSelectedFromDate] = React.useState(new Date('11/22/2019'));
@@ -58,6 +64,8 @@ const UserReportComponent = ({ data }) => {
     const [validateState, setValidateState] = React.useState({
         submit:false
     })
+
+
     const [respState, setRespState] = React.useState({
         resp:false
     })
@@ -77,6 +85,8 @@ const UserReportComponent = ({ data }) => {
     function handleSubmit(event) {
         setRespState({resp: true});
         setValidateState({submit: true});
+        setState({monthDisabled:true,yearDisabled:true,dateDisabled: true, disabled: true,errMsgDiv: true});
+
         event.preventDefault();
         // console.log( 'data'+JSON.stringify(state)+"-From Date- "+selectedFromDate+
         //     "- To Date- "+selectedToDate+"-Format Type - "+formatTypeValue)
@@ -147,13 +157,18 @@ const UserReportComponent = ({ data }) => {
                 headers: { "Content-Type": "application/json"},
                 body:JSON.stringify(reportData),
             }).then(res => {
-                setValidateState({submit: false});
             setRespState({resp: false});
-            handleClickOpen();
-            if(!res.ok){
-                // alert("no Data");
-            }
+            setValidateState({submit: false});
+            setState({monthDisabled:false,yearDisabled:false,dateDisabled: false, disabled: false});
 
+            if(!res.ok){
+                state.errMsgDiv = false;
+                setState({errMessage :'* Services Down'});
+            }
+            if(res.SummeryList && res.SummeryList.length > 0){
+            state.errMsgDiv = false;
+            setState({errMessage :'* No Data Found Given Selection'});
+            }
            /* const filename =  res.headers.get('Content-Disposition').split('filename=')[1];
             res.blob().then(blob => {
                 let url = window.URL.createObjectURL(blob);
@@ -195,6 +210,8 @@ const UserReportComponent = ({ data }) => {
                         />
                         <UserStatusComponent setState={setState}
                                              state={state}
+                                             setRespState = {setRespState}
+                                             respState = {respState}
                         />
                         <UserTypeComponent setState={setState}
                                            state={state}
@@ -233,6 +250,9 @@ const UserReportComponent = ({ data }) => {
                     <div className={classes.root} hidden={!respState.resp} >
                         <LinearProgress />
                         <div className={classes.errMsg}>Please Wait..</div>
+                    </div>
+                    <div className={classes.errMsgDiv} hidden={state.errMsgDiv}>
+                         <span>{state.errMessage}</span>
                     </div>
                 </div>
             </form>

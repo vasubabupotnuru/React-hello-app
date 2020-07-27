@@ -19,11 +19,13 @@ const useStyles = makeStyles({
 });
 
 export const UserStatusComponent = ({   state,
-                                       setState
+                                       setState,
+                                        setRespState,
+                                        respState
+
                                        }) => {
     const classes = useStyles();
     const handleStatusChange = (event) => {
-        console.log("changed");
         if(event.target.checked){
             setState({...state, [event.target.name]: event.target.checked,disabled: false});
         }else{
@@ -44,6 +46,7 @@ export const UserStatusComponent = ({   state,
                             name="Activated"
                             color="primary"
                             value="Activated"
+                            disabled={respState.resp}
                         />
                     }
                     label="Activated"
@@ -58,6 +61,7 @@ export const UserStatusComponent = ({   state,
                             name="NotActivated"
                             color="primary"
                             value="NotActivated"
+                            disabled={respState.resp}
                         />
                     }
                     label="Not Activated"
