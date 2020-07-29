@@ -30,6 +30,12 @@ const useStyles = makeStyles({
         textAlign: "center",
         color: "red"
     },
+    disableForm:
+    {
+        pointerEvents: "none",
+        opacity: 0.7
+    }
+
 });
 
 const reportData = {
@@ -86,6 +92,7 @@ const UserReportComponent = ({ data }) => {
     function handleSubmit(event) {
         setRespState({resp: true});
         setValidateState({submit: true});
+        // setState({dateDisabled: true});
 
 
         event.preventDefault();
@@ -157,7 +164,9 @@ const UserReportComponent = ({ data }) => {
                     a.click();
                 });
              }
-
+             //setState({dateDisabled: false});
+             setRespState({resp: false});
+             setValidateState({submit: false});
         });
 
       //  const url = "http://localhost:8080/v1/download/usersReport";
@@ -209,7 +218,7 @@ const UserReportComponent = ({ data }) => {
     const classes = useStyles();
         return(
             <form id="userReportForm" onSubmit={handleSubmit} >
-                <fieldset disabled={respState.resp}>
+                <div className={respState.resp?classes.disableForm:''}>
                 <div className={classes.div}>
                     <table border="1">
                         <thead></thead>
@@ -279,7 +288,7 @@ const UserReportComponent = ({ data }) => {
                          <span>{state.errMessage}</span>
                     </div>
                 </div>
-                </fieldset>
+                </div>
             </form>
         );
 }
