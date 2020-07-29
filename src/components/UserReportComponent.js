@@ -13,6 +13,7 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogActions from "@material-ui/core/DialogActions";
 import Button from "@material-ui/core/Button";
 import LinearProgress from "@material-ui/core/LinearProgress";
+import {downloadReport} from "./DownloadReport";
 
 const useStyles = makeStyles({
     div:{
@@ -85,7 +86,7 @@ const UserReportComponent = ({ data }) => {
     function handleSubmit(event) {
         setRespState({resp: true});
         setValidateState({submit: true});
-        setState({monthDisabled:true,yearDisabled:true,dateDisabled: true, disabled: true,errMsgDiv: true});
+
 
         event.preventDefault();
         // console.log( 'data'+JSON.stringify(state)+"-From Date- "+selectedFromDate+
@@ -135,7 +136,31 @@ const UserReportComponent = ({ data }) => {
 
         console.log( 'data'+JSON.stringify(reportData));
 
-        const url = "https://curl.haxx.se/libcurl/c/allexamples.zip";
+        downloadReport(reportData).then(result => {
+           console.log(result);
+            if(!result.ok){
+                state.errMsgDiv = false;
+                setState({errMessage :'* Services Down'});
+            }
+            if(result.SummeryList && result.SummeryList.length > 0){
+                state.errMsgDiv = false;
+                setState({errMessage :'* No Data Found Given Selection'});
+            }
+
+            if(result.headers.get('Content-Disposition')) {
+                const filename =  result.headers.get('Content-Disposition').split('filename=')[1];
+                result.blob().then(blob => {
+                    let url = window.URL.createObjectURL(blob);
+                    let a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    a.click();
+                });
+             }
+
+        });
+
+      //  const url = "http://localhost:8080/v1/download/usersReport";
 
         // fetch(url)   // https://curl.haxx.se/libcurl/c/allexamples.zip
         //     .then(Response => Response.json())
@@ -151,7 +176,7 @@ const UserReportComponent = ({ data }) => {
 
 
 
-        fetch(url,
+        /*fetch(url,
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json"},
@@ -159,8 +184,6 @@ const UserReportComponent = ({ data }) => {
             }).then(res => {
             setRespState({resp: false});
             setValidateState({submit: false});
-            setState({monthDisabled:false,yearDisabled:false,dateDisabled: false, disabled: false});
-
             if(!res.ok){
                 state.errMsgDiv = false;
                 setState({errMessage :'* Services Down'});
@@ -169,15 +192,15 @@ const UserReportComponent = ({ data }) => {
             state.errMsgDiv = false;
             setState({errMessage :'* No Data Found Given Selection'});
             }
-           /* const filename =  res.headers.get('Content-Disposition').split('filename=')[1];
+            const filename =  'report.xlsx'// res.headers.get('Content-Disposition').split('filename=')[1];
             res.blob().then(blob => {
                 let url = window.URL.createObjectURL(blob);
                 let a = document.createElement('a');
                 a.href = url;
                 a.download = filename;
                 a.click();
-                });*/
-        });
+                });
+        });*/
 
         // ..code to submit form to backend here... finally call service with reqModel
 
@@ -185,7 +208,8 @@ const UserReportComponent = ({ data }) => {
 
     const classes = useStyles();
         return(
-            <form id="userReportForm" onSubmit={handleSubmit}>
+            <form id="userReportForm" onSubmit={handleSubmit} >
+                <fieldset disabled={respState.resp}>
                 <div className={classes.div}>
                     <table border="1">
                         <thead></thead>
@@ -255,6 +279,7 @@ const UserReportComponent = ({ data }) => {
                          <span>{state.errMessage}</span>
                     </div>
                 </div>
+                </fieldset>
             </form>
         );
 }
