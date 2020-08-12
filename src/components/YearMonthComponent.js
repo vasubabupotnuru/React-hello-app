@@ -38,7 +38,7 @@ export const YearMonthComponent = ({   state,
         }else{
             if(event.target.name === 'CurrentYear') {
                 setState({...state, [event.target.name]: event.target.checked, monthDisabled:false, dateDisabled: false});
-                if(selectedFromDate && selectedToDate) {
+                if(selectedFromDate.getDate() && selectedToDate.getDate()) {
                     setValidateState({submit: false});
                 }else{
                     setValidateState({submit: true});
@@ -46,7 +46,7 @@ export const YearMonthComponent = ({   state,
             }
             else if(event.target.name === 'CurrentMonth'){
                 setState({...state, [event.target.name]: event.target.checked,yearDisabled:false, dateDisabled: false});
-                if(selectedFromDate && selectedToDate) {
+                if(selectedFromDate.getDate() && selectedToDate.getDate()) {
                     setValidateState({submit: false});
                 }else{
                     setValidateState({submit: true});
