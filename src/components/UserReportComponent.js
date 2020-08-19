@@ -92,10 +92,12 @@ const UserReportComponent = ({ data }) => {
     function handleSubmit(event) {
         setRespState({resp: true});
         setValidateState({submit: true});
+        event.preventDefault();
+
         // setState({dateDisabled: true});
 
 
-        event.preventDefault();
+
         // console.log( 'data'+JSON.stringify(state)+"-From Date- "+selectedFromDate+
         //     "- To Date- "+selectedToDate+"-Format Type - "+formatTypeValue)
 
@@ -118,10 +120,32 @@ const UserReportComponent = ({ data }) => {
             }
         }else{
             // range validation
-            const startDate = new Date(selectedFromDate).toISOString().slice(0,10);
+            if(selectedFromDate.getDate() && selectedToDate.getDate()){
+                if (selectedFromDate.getDate() && selectedFromDate.getDate() <=  new Date() && selectedFromDate.getDate() >= selectedMinDate &&
+                    (selectedToDate >= selectedMinDate &&  selectedToDate <= new Date())) {
+                    const startDate = new Date(selectedFromDate).toISOString().slice(0,10);
+                    reportData.startDate = startDate;
+                }else{
+                    setRespState({resp: false});
+                    setValidateState({submit: true});
+                    state.errMsgDiv = false;
+                    setState({errMessage :'* Please check Date validations'});
+                }
+                if (selectedToDate.getDate() && selectedToDate.getDate() >= selectedMinDate && selectedFromDate <= selectedToDate && selectedToDate.getDate() <=  new Date()){
+                    const endDate = new Date(selectedToDate).toISOString().slice(0,10);
+                    reportData.endDate = endDate;
+                }else {
+                    setValidateState({submit: true});
+                    setRespState({resp: false});
+                    state.errMsgDiv = false;
+                    setState({errMessage :'* Please check date validations'});
+                }
+            }
+
+           /* const startDate = new Date(selectedFromDate).toISOString().slice(0,10);
             const endDate = new Date(selectedToDate).toISOString().slice(0,10);
             reportData.startDate = startDate;
-            reportData.endDate = endDate;
+            reportData.endDate = endDate;*/
         }
         // report type format
         reportData.reportFormatType = formatTypeValue;
