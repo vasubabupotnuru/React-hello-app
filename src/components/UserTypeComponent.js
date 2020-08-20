@@ -21,25 +21,46 @@ const useStyles = makeStyles({
 export const UserTypeComponent = ({   state,
                                       setState,
                                       validateState,
-                                      setValidateState
+                                      setValidateState,
+                                      selectedFromDate,
+                                      selectedToDate
                                         }) => {
     const classes = useStyles();
     const handleUserTypeChange = (event) => {
         if(event.target.checked) {
-            setState({...state, [event.target.name]: event.target.checked,monthDisabled:false,yearDisabled:false});
-            setValidateState({submit: false});
+                setState({
+                    ...state,
+                    [event.target.name]: event.target.checked,
+                    monthDisabled: false,
+                    yearDisabled: false
+                });
+            if(selectedToDate.getDate() && selectedFromDate.getDate()) {
+                setValidateState({submit: false});
+            }else {
+                setValidateState({submit: true});
+            }
         }
         else{
-            let condArr = [state.RegisteredNotVerified,state.RegisteredVerified,state.MigratedNotVerified,state.MigratedVerified];
-            let increment = 0;
-            condArr.forEach(element => {
-                if(element){
-                    increment++;
-                }
-            });
-            let validate = increment == 1 ? true:false;
-            setState({...state, [event.target.name]: event.target.checked,monthDisabled:validate,yearDisabled:validate});
-            setValidateState({submit: validate});
+
+                let condArr = [state.RegisteredNotVerified, state.RegisteredVerified, state.MigratedNotVerified, state.MigratedVerified];
+                let increment = 0;
+                condArr.forEach(element => {
+                    if (element) {
+                        increment++;
+                    }
+                });
+                let validate = increment == 1 ? true : false;
+                setState({
+                    ...state,
+                    [event.target.name]: event.target.checked,
+                    monthDisabled: validate,
+                    yearDisabled: validate
+                });
+            if(selectedToDate.getDate() && selectedFromDate.getDate()) {
+                setValidateState({submit: validate});
+            }else {
+                setValidateState({submit: true});
+            }
         }
     };
 

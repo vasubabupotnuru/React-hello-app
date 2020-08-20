@@ -273,7 +273,10 @@ const UserReportComponent = ({ data }) => {
                         <UserTypeComponent setState={setState}
                                            state={state}
                                            validateState={validateState}
-                                           setValidateState={setValidateState}/>
+                                           setValidateState={setValidateState}
+                                           selectedFromDate={selectedFromDate}
+                                           selectedToDate={selectedToDate}
+                        />
                         <FormatTypeComponent state={state}
                                              formatTypeValue={formatTypeValue}
                                              setformatTypeValue={setformatTypeValue}
