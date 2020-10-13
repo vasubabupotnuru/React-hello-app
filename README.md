@@ -699,3 +699,91 @@ public Optional<UserReportResponse> retrieveUserDetailsByCriteria(UsersReportSea
 
 
 
+/////////// OPEN-API///////////////////////
+
+
+
+openapi: 3.0.2
+info:
+  title: Accounts Service API
+  description: Accounts Service API
+  contact:
+    name: Account
+    url: https://account.com
+  version: 1.0.0
+servers:
+  - url: https://account.dev.com
+    description: Devlepmonet Environment
+  - url: https://account.stage.com
+    description: Stage Environment
+paths:
+  /v1/accounts:
+    get:
+      tags:
+        - Account Controller
+      description: Account Management
+      operationId: getAccountsList
+      responses:
+        '200':
+          description: List of Accounts
+          content:
+            '*/*' :
+              schema:
+                $ref: '#/components/schemas/AccountDtoList'
+components:
+  schemas:
+    AccountDto:
+      type: object
+      description: Account Complete Information
+      properties:
+        id:
+          type: integer
+        acctName:
+          type: string
+        acctStrategy:
+          type: string
+        accountManager:
+          type: string
+        specialAccountCode:
+          type: string
+        acestatus:
+          type: string
+        isFunding:
+          type: boolean
+        inceptionDate:
+          type: string
+        bogie2:
+          type: string
+        bogie3:
+          type: string
+        pms:
+          $ref: '#/components/schemas/pmsDtoList'
+        ams:
+          $ref: '#/components/schemas/pmsDtoList'
+        baseCurrency:
+          type: string
+        combinedAccountNo:
+          type: number
+        superAccountNo:
+          type: number
+        lastUpdated:
+          type: string
+        region:
+          type: string
+        domicileCountry:
+          type: string
+    pmsDtoList:
+      type: array
+      items:
+        $ref: '#/components/schemas/commonPmsAmsDto'
+    commonPmsAmsDto:
+      type: object
+      properties:
+        userId:
+          type: string
+        mgrNo:
+          type: string
+    AccountDtoList:
+      type: array
+      items:
+        $ref: '#/components/schemas/AccountDto'
