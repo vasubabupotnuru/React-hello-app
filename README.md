@@ -787,3 +787,64 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/AccountDto'
+	
+	
+14-10-2020:-
+#######################################################################################################################
+model:-
+
+@NotEmpty(message = "Uuid Required")
+    private String uuid;
+    
+ @Column(name = "EMAIL")
+    @Email(message = "Email Format Not Valid")
+    private String email;
+    
+  service impls:-
+  
+        System.out.println(userProfileRepository.existsByUuid(userProfileData.getEmail()));
+
+        System.out.println(userProfileRepository.existsUserProfileDataByUserName(
+                userProfileData.getUserName()));
+		
+repository:-
+
+ boolean existsByUuid(String uuid);
+
+
+    boolean existsUserProfileDataByEmail(String email);
+
+
+
+
+    boolean existsUserProfileDataByUserName(String userName);
+controlleExceptionHandler:-
+
+
+
+@ControllerAdvice
+public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
+
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request){
+        String details = ex.getBindingResult().getAllErrors().get(0).getDefaultMessage();
+        ApiErrorResponse error = new ApiErrorResponse(status.BAD_REQUEST,details);
+        return new ResponseEntity(error, HttpStatus.BAD_REQUEST);
+     }
+}
+
+ApiErrorRespose:-
+
+
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+public class ApiErrorResponse {
+    private HttpStatus status;
+    private String message;
+
+
+
+
+}
+
